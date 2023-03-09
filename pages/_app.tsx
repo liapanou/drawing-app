@@ -1,6 +1,11 @@
-import '@/styles/globals.css'
-import type { AppProps } from 'next/app'
+import { SettingsProvider } from "@/providers";
+import "@/styles/globals.css";
+import type { AppProps } from "next/app";
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />
+  return (
+    <SettingsProvider>
+      <Component {...pageProps} />
+    </SettingsProvider>
+  );
 }
