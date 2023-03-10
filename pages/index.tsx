@@ -23,6 +23,7 @@ export default function Page() {
   const [p5Instance, setP5Instance] = useState<p5Types>();
   const ref = useRef<p5Types>(null);
   const settings = useSettings();
+  const textInputRef = useRef<HTMLInputElement>(null);
   console.log(settings.tool);
 
   // auto runs once at start of program
@@ -40,10 +41,21 @@ export default function Page() {
     let py = p5.pmouseY;
     let x = p5.mouseX;
     let y = p5.mouseY;
+    if (p5.mouseIsPressed === true) {
+      p5.stroke(settings.selectedColor);
+      p5.strokeWeight(settings.tool);
+      p5.line(px, py, x, y);
+    }
+  };
 
-    p5.stroke(settings.selectedColor);
-    p5.strokeWeight(settings.tool);
-    p5.line(px, py, x, y);
+  const textMode = () => {
+    if (p5Instance && settings.tool === 0) {
+      let x = p5Instance.mouseX;
+      let y = p5Instance.mouseY;
+      p5Instance.textSize(32);
+      p5Instance.text(settings.text, x, y);
+      p5Instance.fill(0, 102, 153);
+    }
   };
 
   const clearCanvas = () => {
@@ -71,7 +83,6 @@ export default function Page() {
             )}
             onClick={() => {
               settings.setMode(4);
-              settings.setSelectedColor("#000000");
             }}
           >
             ✏️
@@ -80,35 +91,25 @@ export default function Page() {
             type="button"
             className={clsx(
               " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": settings.tool === 10 }
+              { "bg-yellow-200": settings.tool === 9 }
             )}
             onClick={() => {
-              settings.setMode(10);
-              settings.setSelectedColor("#000000");
+              settings.setMode(9);
             }}
           >
             🖌️
           </button>
         </div>
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <h2>Select Color :</h2>
-          <input
-            type="color"
-            onChange={(evt) =>
-              settings.setSelectedColor(evt.currentTarget.value)
-            }
-          />
-        </div>
+
         <div className="mb-8 flex items-center justify-center gap-4">
           <button
             type="button"
             className={clsx(
               " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": settings.tool === 20 }
+              { "bg-yellow-200": settings.tool === 10 }
             )}
             onClick={() => {
-              settings.setMode(20);
-              settings.setSelectedColor("#ffffff");
+              settings.setMode(10);
             }}
           >
             🧹
@@ -123,22 +124,70 @@ export default function Page() {
           </button>
         </div>
         <div className="mb-8 flex items-center justify-center gap-4">
-          <button
-            type="button"
+          {/* The button to open modal */}
+          <label
+            htmlFor="my-modal-5"
+            onClick={() => {
+              if (!textInputRef.current) return;
+              textInputRef.current.checked = true;
+              settings.setMode(0);
+            }}
             className={clsx(
-              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200"
+              "btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
+              { "bg-yellow-200": settings.tool === 0 }
             )}
           >
             🇦
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200"
-            )}
-          >
-            🔍
-          </button>
+          </label>
+
+          {/* Put this part before </body> tag */}
+          <input type="checkbox" id="my-modal-5" className="modal-toggle" />
+          <div className="modal">
+            <div className="modal-box z-50">
+              <h3 className="mb-4 text-lg font-bold">
+                Write what you like here :
+              </h3>
+              <input
+                ref={textInputRef}
+                checked={textInputRef?.current?.checked}
+                type="text"
+                onChange={(evt) => settings.setText(evt.currentTarget.value)}
+                className=" w-full border border-black"
+              />
+              <div className="modal-action">
+                <button
+                  onClick={() => {
+                    settings.setText("");
+                    if (textInputRef.current) {
+                      textInputRef.current.value = "";
+                    }
+                  }}
+                  className="btn"
+                >
+                  Erase
+                </button>
+
+                <label
+                  onClick={(evt) => {
+                    evt.stopPropagation();
+                  }}
+                  htmlFor="my-modal-5"
+                  className="btn"
+                >
+                  Submit
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mb-8 flex items-center justify-center gap-3">
+          <h2>Select Color :</h2>
+          <input
+            type="color"
+            onChange={(evt) =>
+              settings.setSelectedColor(evt.currentTarget.value)
+            }
+          />
         </div>
 
         <div className="mt-auto mb-8 flex flex-col items-center justify-center gap-4">
@@ -153,7 +202,7 @@ export default function Page() {
           </picture>
         </div>
       </div>
-      <Sketch setup={setup} draw={draw} />
+      <Sketch setup={setup} draw={draw} mousePressed={textMode} />
     </div>
   );
 }
