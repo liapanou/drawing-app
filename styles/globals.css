@@ -13,3 +13,26 @@
     justify-content: center;
     text-align: center;
     transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;}
+
+
+   
+
+
+
+      .blinking-border {
+        border: 4px solid transparent;
+        animation: blink 1s infinite;
+      }
+      
+      @keyframes blink {
+        0% {
+          
+          border-color: rgb(254 240 138 / var(--tw-border-opacity))
+        }
+        50% {
+          border-color: transparent;
+        }
+        100% {
+          border-color: rgb(254 240 138 / var(--tw-border-opacity))
+        }
+      }

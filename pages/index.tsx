@@ -24,7 +24,14 @@ export default function Page() {
   const ref = useRef<p5Types>(null);
   const settings = useSettings();
   const textInputRef = useRef<HTMLInputElement>(null);
-  console.log(settings.tool);
+
+  const handleOnChange = (event: any) => {
+    settings.newSelectedColor = event.currentTarget.value;
+    settings.prevSelectedColor = settings.selectedColor;
+    settings.setSelectedColor(settings.newSelectedColor);
+    console.log("Previous value:", settings.prevSelectedColor);
+    console.log("New value:", settings.newSelectedColor);
+  };
 
   // auto runs once at start of program
 
@@ -54,7 +61,7 @@ export default function Page() {
       let y = p5Instance.mouseY;
       p5Instance.textSize(32);
       p5Instance.text(settings.text, x, y);
-      p5Instance.fill(0, 102, 153);
+      p5Instance.fill(settings.selectedColor);
     }
   };
 
@@ -82,6 +89,9 @@ export default function Page() {
               { "bg-yellow-200": settings.tool === 4 }
             )}
             onClick={() => {
+              if (settings.tool === 10 && settings.selectedColor === "#fff") {
+                settings.setSelectedColor(settings.prevSelectedColor);
+              }
               settings.setMode(4);
             }}
           >
@@ -94,6 +104,9 @@ export default function Page() {
               { "bg-yellow-200": settings.tool === 9 }
             )}
             onClick={() => {
+              if (settings.tool === 10 && settings.selectedColor === "#fff") {
+                settings.setSelectedColor(settings.prevSelectedColor);
+              }
               settings.setMode(9);
             }}
           >
@@ -182,24 +195,21 @@ export default function Page() {
         </div>
         <div className="mb-8 flex items-center justify-center gap-3">
           <h2>Select Color :</h2>
-          <input
-            type="color"
-            onChange={(evt) =>
-              settings.setSelectedColor(evt.currentTarget.value)
-            }
-          />
+          <input type="color" onChange={handleOnChange} />
         </div>
 
         <div className="mt-auto mb-8 flex flex-col items-center justify-center gap-4">
           <h2 className="font-bold ">Drawing Goal</h2>
-          <picture>
-            <img
-              src="https://www.nyip.edu/images/cms/photo-articles/the-best-place-to-focus-in-a-landscape.jpg"
-              alt="Drawing Goal"
-              width={500}
-              height={500}
-            />
-          </picture>
+          <div className="blinking-border">
+            <picture>
+              <img
+                src="https://www.nyip.edu/images/cms/photo-articles/the-best-place-to-focus-in-a-landscape.jpg"
+                alt="Drawing Goal"
+                width={500}
+                height={500}
+              />
+            </picture>
+          </div>
         </div>
       </div>
       <Sketch setup={setup} draw={draw} mousePressed={textMode} />
