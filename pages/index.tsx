@@ -1,8 +1,20 @@
 import { useSettings } from "@/providers";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
-import p5Types from "p5"; //Import this for typechecking and intellisense
+import { default as p5Types } from "p5";
 import { useRef, useState } from "react";
+import {
+  EmailIcon,
+  EmailShareButton,
+  FacebookIcon,
+  FacebookMessengerShareButton,
+  InstapaperIcon,
+  InstapaperShareButton,
+  TwitterIcon,
+  TwitterShareButton,
+  ViberIcon,
+  ViberShareButton,
+} from "react-share";
 
 // Will only import `react-p5` on client-side
 const Sketch = dynamic(
@@ -24,14 +36,8 @@ export default function Page() {
   const ref = useRef<p5Types>(null);
   const settings = useSettings();
   const textInputRef = useRef<HTMLInputElement>(null);
-
-  const handleOnChange = (event: any) => {
-    settings.newSelectedColor = event.currentTarget.value;
-    settings.prevSelectedColor = settings.selectedColor;
-    settings.setSelectedColor(settings.newSelectedColor);
-    console.log("Previous value:", settings.prevSelectedColor);
-    console.log("New value:", settings.newSelectedColor);
-  };
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvas = canvasRef.current;
 
   // auto runs once at start of program
 
@@ -55,6 +61,7 @@ export default function Page() {
     }
   };
 
+  // makes text
   const textMode = () => {
     if (p5Instance && settings.tool === 0) {
       let x = p5Instance.mouseX;
@@ -65,9 +72,31 @@ export default function Page() {
     }
   };
 
+  // clears the canvas
   const clearCanvas = () => {
     p5Instance?.clear();
   };
+
+  const handleOnChange = (event: any) => {
+    settings.newSelectedColor = event.currentTarget.value;
+    settings.prevSelectedColor = settings.selectedColor;
+    settings.setSelectedColor(settings.newSelectedColor);
+    console.log("Previous value:", settings.prevSelectedColor);
+    console.log("New value:", settings.newSelectedColor);
+  };
+
+  // new p5((p5: p5Types, canvasParentRef: Element) => {
+  //   p5.setup = () => setup(p5, canvasParentRef);
+  //   p5.draw = () => draw(p5);
+  // });
+
+  // const shareToSocialMedia = () => {
+  //   if (canvas && canvasRef) {
+  //     const dataUrl = canvasRef.toDataURL();
+  //     const img = new Image();
+  //     img.src = dataUrl;
+  //   }
+  // };
 
   return (
     <div className=" grid h-screen w-screen grid-cols-[300px_2fr] bg-white">
@@ -198,6 +227,27 @@ export default function Page() {
           <input type="color" onChange={handleOnChange} />
         </div>
 
+        <div className="flex  flex-col items-center justify-center">
+          <h2 className="mb-4">Share your drawing :</h2>
+          <div className="flex gap-1">
+            <FacebookMessengerShareButton url="" appId={""}>
+              <FacebookIcon size={32} round={true} />
+            </FacebookMessengerShareButton>
+            <InstapaperShareButton url={""}>
+              <InstapaperIcon size={32} round={true} />
+            </InstapaperShareButton>
+            <TwitterShareButton url={""}>
+              <TwitterIcon size={32} round={true} />
+            </TwitterShareButton>
+            <ViberShareButton url={""}>
+              <ViberIcon size={32} round={true} />
+            </ViberShareButton>
+            <EmailShareButton url={""}>
+              <EmailIcon size={32} round={true} />
+            </EmailShareButton>
+          </div>
+        </div>
+
         <div className="mt-auto mb-8 flex flex-col items-center justify-center gap-4">
           <h2 className="font-bold ">Drawing Goal</h2>
           <div className="blinking-border">
@@ -212,7 +262,9 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <Sketch setup={setup} draw={draw} mousePressed={textMode} />
+      <div>
+        <Sketch setup={setup} draw={draw} mousePressed={textMode} />
+      </div>
     </div>
   );
 }
