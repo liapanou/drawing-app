@@ -54,8 +54,9 @@ export default function Page() {
     let py = p5.pmouseY;
     let x = p5.mouseX;
     let y = p5.mouseY;
+
     if (p5.mouseIsPressed === true) {
-      p5.stroke(settings.selectedColor);
+      p5.stroke(erase ? "#fff" : settings.selectedColor);
       p5.strokeWeight(settings.tool);
       p5.line(px, py, x, y);
     }
@@ -77,26 +78,7 @@ export default function Page() {
     p5Instance?.clear();
   };
 
-  const handleOnChange = (event: any) => {
-    settings.newSelectedColor = event.currentTarget.value;
-    settings.prevSelectedColor = settings.selectedColor;
-    settings.setSelectedColor(settings.newSelectedColor);
-    console.log("Previous value:", settings.prevSelectedColor);
-    console.log("New value:", settings.newSelectedColor);
-  };
-
-  // new p5((p5: p5Types, canvasParentRef: Element) => {
-  //   p5.setup = () => setup(p5, canvasParentRef);
-  //   p5.draw = () => draw(p5);
-  // });
-
-  // const shareToSocialMedia = () => {
-  //   if (canvas && canvasRef) {
-  //     const dataUrl = canvasRef.toDataURL();
-  //     const img = new Image();
-  //     img.src = dataUrl;
-  //   }
-  // };
+  const [erase, setErase] = useState(false);
 
   return (
     <div className=" grid h-screen w-screen grid-cols-[300px_2fr] bg-white">
@@ -118,9 +100,7 @@ export default function Page() {
               { "bg-yellow-200": settings.tool === 4 }
             )}
             onClick={() => {
-              if (settings.tool === 10 && settings.selectedColor === "#fff") {
-                settings.setSelectedColor(settings.prevSelectedColor);
-              }
+              setErase(false);
               settings.setMode(4);
             }}
           >
@@ -133,9 +113,7 @@ export default function Page() {
               { "bg-yellow-200": settings.tool === 9 }
             )}
             onClick={() => {
-              if (settings.tool === 10 && settings.selectedColor === "#fff") {
-                settings.setSelectedColor(settings.prevSelectedColor);
-              }
+              setErase(false);
               settings.setMode(9);
             }}
           >
@@ -151,6 +129,7 @@ export default function Page() {
               { "bg-yellow-200": settings.tool === 10 }
             )}
             onClick={() => {
+              setErase(true);
               settings.setMode(10);
             }}
           >
@@ -199,7 +178,6 @@ export default function Page() {
               <div className="modal-action">
                 <button
                   onClick={() => {
-                    settings.setText("");
                     if (textInputRef.current) {
                       textInputRef.current.value = "";
                     }
@@ -224,7 +202,12 @@ export default function Page() {
         </div>
         <div className="mb-8 flex items-center justify-center gap-3">
           <h2>Select Color :</h2>
-          <input type="color" onChange={handleOnChange} />
+          <input
+            type="color"
+            onChange={(evt) =>
+              settings.setSelectedColor(evt.currentTarget.value)
+            }
+          />
         </div>
 
         <div className="flex  flex-col items-center justify-center">

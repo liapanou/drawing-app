@@ -2,9 +2,7 @@ import { createContext, ReactNode, useContext, useState } from "react";
 
 type ContextType = {
   tool: number;
-  prevSelectedColor: string;
   selectedColor: string;
-  newSelectedColor: string;
   text: string;
   setMode: (n: number) => void;
   setSelectedColor: (c: string) => void;
@@ -13,9 +11,7 @@ type ContextType = {
 
 const defaultValue: ContextType = {
   tool: 4,
-  prevSelectedColor: "",
   selectedColor: "#000000",
-  newSelectedColor: "",
   text: "",
   setMode: (n: number) => {},
   setSelectedColor: (c: string) => {},
@@ -39,7 +35,6 @@ export function SettingsProvider(props: { children: ReactNode }) {
     setState({
       ...state,
       tool: n,
-      selectedColor: n === 10 ? "#fff" : state.selectedColor,
     });
   }
 
