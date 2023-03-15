@@ -2,19 +2,7 @@ import { useSettings } from "@/providers";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
 import { default as p5Types } from "p5";
-import { useRef, useState } from "react";
-import {
-  EmailIcon,
-  EmailShareButton,
-  FacebookIcon,
-  FacebookMessengerShareButton,
-  InstapaperIcon,
-  InstapaperShareButton,
-  TwitterIcon,
-  TwitterShareButton,
-  ViberIcon,
-  ViberShareButton,
-} from "react-share";
+import { useEffect, useRef, useState } from "react";
 
 // Will only import `react-p5` on client-side
 const Sketch = dynamic(
@@ -33,22 +21,36 @@ const Sketch = dynamic(
 export default function Page() {
   //See annotations in JS for more information
   const [p5Instance, setP5Instance] = useState<p5Types>();
+  const [erase, setErase] = useState<boolean>(false);
+  const [fillBg, setFillBg] = useState<boolean>(false);
+  const [val, setVal] = useState<boolean | null>(null);
   const ref = useRef<p5Types>(null);
   const settings = useSettings();
+  const menuRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const canvas = canvasRef.current;
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  let canvas: p5Types.Element | HTMLCanvasElement;
+  let menuWidthRef = useRef(0);
+  useEffect(() => {
+    const menu = menuRef.current;
+    if (menu) {
+      menuWidthRef.current = menu.clientWidth;
+    }
+  }, [menuRef]);
 
   // auto runs once at start of program
 
   const setup = (p5: p5Types, canvasParentRef: Element) => {
-    const width = p5.windowWidth - 300;
-    p5.createCanvas(width, p5.windowHeight).parent(canvasParentRef);
-    setP5Instance(p5);
-    p5.background(255);
+    if (menuRef.current) {
+      let width = p5.windowWidth - menuWidthRef.current; // set the width of the canvas to be the windows.width - menu.width
+      canvas = p5.createCanvas(width, p5.windowHeight).parent(canvasParentRef);
+      setP5Instance(p5);
+      p5.background("#fff");
+    }
   };
 
   // auto loops continuously
+  // the specific draw rules say that you can draw lines when the mouse is pressed
   const draw = (p5: p5Types) => {
     let px = p5.pmouseX;
     let py = p5.pmouseY;
@@ -56,7 +58,7 @@ export default function Page() {
     let y = p5.mouseY;
 
     if (p5.mouseIsPressed === true) {
-      p5.stroke(erase ? "#fff" : settings.selectedColor);
+      p5.stroke(erase ? "#fff" : settings.selectedColor); // set the correct color depending on the state of erase
       p5.strokeWeight(settings.tool);
       p5.line(px, py, x, y);
     }
@@ -78,11 +80,26 @@ export default function Page() {
     p5Instance?.clear();
   };
 
-  const [erase, setErase] = useState(false);
+  const ValidateEmail = (email: string) => {
+    var validRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    if (email === "") {
+      setVal(null);
+    }
+    if (email.match(validRegex)) {
+      setVal(true);
+    } else {
+      setVal(false);
+    }
+  };
 
+  console.log(emailInputRef.current?.checked);
   return (
-    <div className=" grid h-screen w-screen grid-cols-[300px_2fr] bg-white">
-      <div className=" flex flex-col border-r border-black bg-zinc-400 py-2 px-2">
+    <div className=" grid h-screen w-screen grid-cols-[300px_2fr] bg-white ">
+      <div
+        ref={menuRef}
+        className=" flex flex-col border-r border-black bg-zinc-400 py-2 px-2"
+      >
         <h2 className=" mb-4  text-center font-bold">Drawing Tools</h2>
         <button
           id="clearCanvas"
@@ -92,6 +109,38 @@ export default function Page() {
         >
           Clear canvas
         </button>
+
+        <div className="mb-8 flex items-center justify-center gap-4">
+          <button
+            type="button"
+            className={clsx(
+              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
+              { "bg-yellow-200": settings.tool === 10 }
+            )}
+            onClick={() => {
+              setErase(true);
+              setFillBg(false);
+              settings.setMode(10);
+            }}
+          >
+            🧹
+          </button>
+          <button
+            type="button"
+            className={clsx(
+              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
+              { "bg-yellow-200": fillBg }
+            )}
+            onClick={() => {
+              setErase(false);
+              settings.setMode(1);
+              setFillBg(true);
+              p5Instance?.background(settings.selectedColor);
+            }}
+          >
+            🪣
+          </button>
+        </div>
         <div className="mb-8 flex items-center justify-center gap-4">
           <button
             type="button"
@@ -101,6 +150,7 @@ export default function Page() {
             )}
             onClick={() => {
               setErase(false);
+              setFillBg(false);
               settings.setMode(4);
             }}
           >
@@ -114,34 +164,11 @@ export default function Page() {
             )}
             onClick={() => {
               setErase(false);
+              setFillBg(false);
               settings.setMode(9);
             }}
           >
             🖌️
-          </button>
-        </div>
-
-        <div className="mb-8 flex items-center justify-center gap-4">
-          <button
-            type="button"
-            className={clsx(
-              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": settings.tool === 10 }
-            )}
-            onClick={() => {
-              setErase(true);
-              settings.setMode(10);
-            }}
-          >
-            🧹
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200"
-            )}
-          >
-            🪣
           </button>
         </div>
         <div className="mb-8 flex items-center justify-center gap-4">
@@ -152,10 +179,13 @@ export default function Page() {
               if (!textInputRef.current) return;
               textInputRef.current.checked = true;
               settings.setMode(0);
+              setFillBg(false);
             }}
             className={clsx(
               "btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": settings.tool === 0 }
+              {
+                "bg-yellow-200": settings.tool === 0,
+              }
             )}
           >
             🇦
@@ -178,6 +208,7 @@ export default function Page() {
               <div className="modal-action">
                 <button
                   onClick={() => {
+                    settings.setText("");
                     if (textInputRef.current) {
                       textInputRef.current.value = "";
                     }
@@ -188,11 +219,12 @@ export default function Page() {
                 </button>
 
                 <label
-                  onClick={(evt) => {
-                    evt.stopPropagation();
-                  }}
                   htmlFor="my-modal-5"
                   className="btn"
+                  onClick={() => {
+                    if (!textInputRef.current) return;
+                    textInputRef.current.checked = false;
+                  }}
                 >
                   Submit
                 </label>
@@ -209,25 +241,106 @@ export default function Page() {
             }
           />
         </div>
+        <button
+          id="saveCanvas"
+          type="button"
+          className="btn mb-4 w-auto rounded-full border border-black bg-transparent p-2  hover:bg-yellow-200"
+          onClick={() => {
+            p5Instance?.saveCanvas(canvas, "my-drawing", "png"); // saves and downloads the drawing in your device
+          }}
+        >
+          💾
+        </button>
 
         <div className="flex  flex-col items-center justify-center">
           <h2 className="mb-4">Share your drawing :</h2>
-          <div className="flex gap-1">
-            <FacebookMessengerShareButton url="" appId={""}>
-              <FacebookIcon size={32} round={true} />
-            </FacebookMessengerShareButton>
-            <InstapaperShareButton url={""}>
-              <InstapaperIcon size={32} round={true} />
-            </InstapaperShareButton>
-            <TwitterShareButton url={""}>
-              <TwitterIcon size={32} round={true} />
-            </TwitterShareButton>
-            <ViberShareButton url={""}>
-              <ViberIcon size={32} round={true} />
-            </ViberShareButton>
-            <EmailShareButton url={""}>
-              <EmailIcon size={32} round={true} />
-            </EmailShareButton>
+          {/* The button to open modal */}
+          <label
+            htmlFor="my-modal-6"
+            onClick={() => {
+              if (!emailInputRef.current) return;
+              emailInputRef.current.checked = true;
+              settings.setMode(2);
+              setFillBg(false);
+            }}
+            className={clsx(
+              "btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
+              { "bg-yellow-200": emailInputRef.current?.checked }
+            )}
+          >
+            📧
+          </label>
+
+          {/* Put this part before </body> tag */}
+          <input type="checkbox" id="my-modal-6" className="modal-toggle" />
+          <div className="modal">
+            <div className="modal-box z-50">
+              <div className="emailBox">
+                <label
+                  htmlFor="emailAddress"
+                  className="mb-4 text-lg font-bold"
+                >
+                  Write the email which you want to send your drawing :
+                </label>
+                <input
+                  ref={emailInputRef}
+                  checked={emailInputRef?.current?.checked}
+                  type="email"
+                  id="emailAddress"
+                  placeholder="example@email.com"
+                  required
+                  onChange={(evt) => {
+                    settings.setEmail(evt.currentTarget.value);
+                  }}
+                  className={clsx(
+                    " w-full border border-black",
+                    {
+                      "border-red-700": val === false,
+                    },
+                    {
+                      "border-green-600": val === true,
+                    }
+                  )}
+                />
+              </div>
+              <div className={clsx("mt-2", { hidden: val === null })}>
+                {val ? (
+                  <label className="text-green-600">Valid email address!</label>
+                ) : (
+                  <label className="text-red-700">Invalid email address!</label>
+                )}
+              </div>
+
+              <div className="modal-action">
+                <button
+                  onClick={() => {
+                    settings.setEmail("");
+                    if (emailInputRef.current) {
+                      emailInputRef.current.value = "";
+                    }
+                  }}
+                  className="btn"
+                >
+                  Erase
+                </button>
+                <label
+                  htmlFor="my-modal-6"
+                  className="btn"
+                  onClick={() => {
+                    ValidateEmail(settings.email);
+                    if (val === null) return;
+                    if (val === false) {
+                    }
+                    setTimeout(() => {
+                      if (!emailInputRef.current) return;
+                      emailInputRef.current.checked = false;
+                    });
+                  }}
+                >
+                  Submit
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -246,64 +359,15 @@ export default function Page() {
         </div>
       </div>
       <div>
-        <Sketch setup={setup} draw={draw} mousePressed={textMode} />
+        <Sketch
+          setup={setup}
+          draw={draw}
+          mousePressed={() => {
+            if (textInputRef?.current?.checked === true) return;
+            textMode();
+          }}
+        />
       </div>
     </div>
   );
 }
-
-// p5.js Web Editor - how to draw and change color and font of color
-
-// let dcolor
-// let tool = 0
-// let rbutton
-// let ybutton
-// let bmbutton
-// let pmbutton
-
-// function setup() {
-//   dcolor = color(0,0,255)
-//   createCanvas(900, 900);
-//   background(220);
-//   rbutton = createButton("R")
-//   rbutton.position(0,0)
-//   rbutton.mousePressed(redColor)
-//   bmbutton = createButton("BM")
-//   bmbutton.position(20,20)
-//   bmbutton.mousePressed(brushMode)
-//   pmbutton = createButton("PM")
-//   pmbutton.position(60,20)
-//   pmbutton.mousePressed(pencilMode)
-//   ybutton = createButton("Y")
-//   ybutton.position(30,0)
-//   ybutton.mousePressed(yellowColor)
-
-// }
-
-// function redColor (){
-//   dcolor = color(255,0,0)
-// }
-
-// function yellowColor (){
-//   dcolor = color(255,255,0)
-// }
-
-// function pencilMode () {
-//   tool = 4
-// }
-
-// function brushMode () {
-//   tool = 10
-// }
-
-// function draw() {
-// let px = pmouseX
-// let py = pmouseY
-// let x = mouseX
-// let y = mouseY
-
-//   stroke(dcolor)
-//   strokeWeight(tool)
-//   line(px,py,x,y)
-
-// }
