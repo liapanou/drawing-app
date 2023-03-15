@@ -31,6 +31,8 @@ export default function Page() {
   const emailInputRef = useRef<HTMLInputElement>(null);
   let canvas: p5Types.Element | HTMLCanvasElement;
   let menuWidthRef = useRef(0);
+  let width: number;
+
   useEffect(() => {
     const menu = menuRef.current;
     if (menu) {
@@ -42,7 +44,7 @@ export default function Page() {
 
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     if (menuRef.current) {
-      let width = p5.windowWidth - menuWidthRef.current; // set the width of the canvas to be the windows.width - menu.width
+      width = p5.windowWidth - menuWidthRef.current; // set the width of the canvas to be the windows.width - menu.width
       canvas = p5.createCanvas(width, p5.windowHeight).parent(canvasParentRef);
       setP5Instance(p5);
       p5.background("#fff");
@@ -60,12 +62,71 @@ export default function Page() {
     if (p5.mouseIsPressed === true) {
       p5.stroke(erase ? "#fff" : settings.selectedColor); // set the correct color depending on the state of erase
       p5.strokeWeight(settings.tool);
-      p5.line(px, py, x, y);
+      p5.line(p5.floor(px), p5.floor(py), p5.floor(x), p5.floor(y));
     }
   };
 
+  // start of rules of paint backet
+  const floodFill = (
+    p5: p5Types,
+    x: number,
+    y: number,
+    targetColor: any,
+    fillColor: any
+  ) => {
+    x = p5.mouseX;
+    y = p5.mouseY;
+    console.log("floodFill called with", x, y, targetColor, fillColor);
+    const currentColor = p5.get(x, y);
+    if (!compareColors(currentColor, targetColor)) {
+      return; // stop if the current color is not the target color
+    }
+    p5.set(x, y, fillColor); // fill the current pixel with the fill color
+    floodFill(p5, x + 1, y, targetColor, fillColor); // fill the right neighbor
+    floodFill(p5, x - 1, y, targetColor, fillColor); // fill the left neighbor
+    floodFill(p5, x, y + 1, targetColor, fillColor); // fill the bottom neighbor
+    floodFill(p5, x, y - 1, targetColor, fillColor); // fill the top neighbor
+  };
+
+  const compareColors = (c1: any, c2: any) => {
+    // compare two color values as arrays of [R, G, B, A]
+    let currentColor = c1;
+    let targetColor = c2;
+    if (!p5Instance) {
+      return false;
+    }
+    // compare colors and return result
+    for (let i = 0; i < 4; i++) {
+      if (currentColor[i] !== targetColor[i]) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const colorBacket = () => {
+    if (p5Instance && fillBg === true && p5Instance.mouseIsPressed === true) {
+      let x = p5Instance.mouseX;
+      let y = p5Instance.mouseY;
+      const targetColor = p5Instance.get(p5Instance.mouseX, p5Instance.mouseY);
+      console.log(targetColor);
+      const fillColor = p5Instance.color(255, 0, 0);
+      floodFill(
+        p5Instance,
+        p5Instance.mouseX,
+        p5Instance.mouseY,
+        targetColor,
+        fillColor
+      );
+    }
+  };
+
+  // end of rules of paint backet
+
   // makes text
   const textMode = () => {
+    let x = p5Instance?.mouseX;
+    let y = p5Instance?.mouseY;
     if (p5Instance && settings.tool === 0) {
       let x = p5Instance.mouseX;
       let y = p5Instance.mouseY;
@@ -133,9 +194,9 @@ export default function Page() {
             )}
             onClick={() => {
               setErase(false);
-              settings.setMode(1);
+              settings.setMode(0);
               setFillBg(true);
-              p5Instance?.background(settings.selectedColor);
+              colorBacket();
             }}
           >
             🪣
@@ -184,7 +245,7 @@ export default function Page() {
             className={clsx(
               "btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
               {
-                "bg-yellow-200": settings.tool === 0,
+                "bg-yellow-200": settings.tool === 0 && fillBg === false,
               }
             )}
           >
