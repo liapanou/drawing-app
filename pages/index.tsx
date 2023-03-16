@@ -29,6 +29,7 @@ export default function Page() {
   const menuRef = useRef<HTMLDivElement>(null);
   const textInputRef = useRef<HTMLInputElement>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
+  const pRef = useRef<HTMLParagraphElement>(null);
   let canvas: p5Types.Element | HTMLCanvasElement;
   let menuWidthRef = useRef(0);
   let width: number;
@@ -67,59 +68,59 @@ export default function Page() {
   };
 
   // start of rules of paint backet
-  const floodFill = (
-    p5: p5Types,
-    x: number,
-    y: number,
-    targetColor: any,
-    fillColor: any
-  ) => {
-    x = p5.mouseX;
-    y = p5.mouseY;
-    console.log("floodFill called with", x, y, targetColor, fillColor);
-    const currentColor = p5.get(x, y);
-    if (!compareColors(currentColor, targetColor)) {
-      return; // stop if the current color is not the target color
-    }
-    p5.set(x, y, fillColor); // fill the current pixel with the fill color
-    floodFill(p5, x + 1, y, targetColor, fillColor); // fill the right neighbor
-    floodFill(p5, x - 1, y, targetColor, fillColor); // fill the left neighbor
-    floodFill(p5, x, y + 1, targetColor, fillColor); // fill the bottom neighbor
-    floodFill(p5, x, y - 1, targetColor, fillColor); // fill the top neighbor
-  };
+  // const floodFill = (
+  //   p5: p5Types,
+  //   x: number,
+  //   y: number,
+  //   targetColor: any,
+  //   fillColor: any
+  // ) => {
+  //   x = p5.mouseX;
+  //   y = p5.mouseY;
+  //   console.log("floodFill called with", x, y, targetColor, fillColor);
+  //   const currentColor = p5.get(x, y);
+  //   if (!compareColors(currentColor, targetColor)) {
+  //     return; // stop if the current color is not the target color
+  //   }
+  //   p5.set(x, y, fillColor); // fill the current pixel with the fill color
+  //   floodFill(p5, x + 1, y, targetColor, fillColor); // fill the right neighbor
+  //   floodFill(p5, x - 1, y, targetColor, fillColor); // fill the left neighbor
+  //   floodFill(p5, x, y + 1, targetColor, fillColor); // fill the bottom neighbor
+  //   floodFill(p5, x, y - 1, targetColor, fillColor); // fill the top neighbor
+  // };
 
-  const compareColors = (c1: any, c2: any) => {
-    // compare two color values as arrays of [R, G, B, A]
-    let currentColor = c1;
-    let targetColor = c2;
-    if (!p5Instance) {
-      return false;
-    }
-    // compare colors and return result
-    for (let i = 0; i < 4; i++) {
-      if (currentColor[i] !== targetColor[i]) {
-        return false;
-      }
-    }
-    return true;
-  };
+  // const compareColors = (c1: any, c2: any) => {
+  //   // compare two color values as arrays of [R, G, B, A]
+  //   let currentColor = c1;
+  //   let targetColor = c2;
+  //   if (!p5Instance) {
+  //     return false;
+  //   }
+  //   // compare colors and return result
+  //   for (let i = 0; i < 4; i++) {
+  //     if (currentColor[i] !== targetColor[i]) {
+  //       return false;
+  //     }
+  //   }
+  //   return true;
+  // };
 
-  const colorBacket = () => {
-    if (p5Instance && fillBg === true && p5Instance.mouseIsPressed === true) {
-      let x = p5Instance.mouseX;
-      let y = p5Instance.mouseY;
-      const targetColor = p5Instance.get(p5Instance.mouseX, p5Instance.mouseY);
-      console.log(targetColor);
-      const fillColor = p5Instance.color(255, 0, 0);
-      floodFill(
-        p5Instance,
-        p5Instance.mouseX,
-        p5Instance.mouseY,
-        targetColor,
-        fillColor
-      );
-    }
-  };
+  // const colorBacket = () => {
+  //   if (p5Instance && fillBg === true && p5Instance.mouseIsPressed === true) {
+  //     let x = p5Instance.mouseX;
+  //     let y = p5Instance.mouseY;
+  //     const targetColor = p5Instance.get(p5Instance.mouseX, p5Instance.mouseY);
+  //     console.log(targetColor);
+  //     const fillColor = p5Instance.color(255, 0, 0);
+  //     floodFill(
+  //       p5Instance,
+  //       p5Instance.mouseX,
+  //       p5Instance.mouseY,
+  //       targetColor,
+  //       fillColor
+  //     );
+  //   }
+  // };
 
   // end of rules of paint backet
 
@@ -196,7 +197,7 @@ export default function Page() {
               setErase(false);
               settings.setMode(0);
               setFillBg(true);
-              colorBacket();
+              // colorBacket();
             }}
           >
             🪣
@@ -264,7 +265,7 @@ export default function Page() {
                 checked={textInputRef?.current?.checked}
                 type="text"
                 onChange={(evt) => settings.setText(evt.currentTarget.value)}
-                className=" w-full border border-black"
+                className=" h-10 w-full rounded-lg border border-black"
               />
               <div className="modal-action">
                 <button
@@ -293,8 +294,8 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div className="mb-8 flex items-center justify-center gap-3">
-          <h2>Select Color :</h2>
+        <div className="mb-8 flex  flex-col items-center justify-center gap-3">
+          <h2 className="mb-4">Select Color :</h2>
           <input
             type="color"
             onChange={(evt) =>
@@ -302,16 +303,21 @@ export default function Page() {
             }
           />
         </div>
-        <button
-          id="saveCanvas"
-          type="button"
-          className="btn mb-4 w-auto rounded-full border border-black bg-transparent p-2  hover:bg-yellow-200"
-          onClick={() => {
-            p5Instance?.saveCanvas(canvas, "my-drawing", "png"); // saves and downloads the drawing in your device
-          }}
-        >
-          💾
-        </button>
+        <div className="mb-8  flex flex-col items-center justify-center">
+          <h2 className="mb-4">Save your drawing :</h2>
+          <button
+            id="saveCanvas"
+            type="button"
+            className={clsx(
+              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200"
+            )}
+            onClick={() => {
+              p5Instance?.saveCanvas(canvas, "my-drawing", "png"); // saves and downloads the drawing in your device
+            }}
+          >
+            💾
+          </button>
+        </div>
 
         <div className="flex  flex-col items-center justify-center">
           <h2 className="mb-4">Share your drawing :</h2>
@@ -336,71 +342,40 @@ export default function Page() {
           <input type="checkbox" id="my-modal-6" className="modal-toggle" />
           <div className="modal">
             <div className="modal-box z-50">
-              <div className="emailBox">
-                <label
-                  htmlFor="emailAddress"
-                  className="mb-4 text-lg font-bold"
-                >
-                  Write the email which you want to send your drawing :
-                </label>
-                <input
-                  ref={emailInputRef}
-                  checked={emailInputRef?.current?.checked}
-                  type="email"
-                  id="emailAddress"
-                  placeholder="example@email.com"
-                  required
-                  onChange={(evt) => {
-                    settings.setEmail(evt.currentTarget.value);
-                  }}
-                  className={clsx(
-                    " w-full border border-black",
-                    {
-                      "border-red-700": val === false,
-                    },
-                    {
-                      "border-green-600": val === true,
-                    }
-                  )}
-                />
-              </div>
-              <div className={clsx("mt-2", { hidden: val === null })}>
-                {val ? (
-                  <label className="text-green-600">Valid email address!</label>
-                ) : (
-                  <label className="text-red-700">Invalid email address!</label>
-                )}
-              </div>
+              <form onSubmit={(evt) => {}}>
+                <label className=" block">
+                  <label
+                    htmlFor="emailAddress"
+                    className="mb-4 block text-lg font-bold"
+                  >
+                    Write the email which you want to send your drawing :
+                  </label>
 
-              <div className="modal-action">
-                <button
-                  onClick={() => {
-                    settings.setEmail("");
-                    if (emailInputRef.current) {
-                      emailInputRef.current.value = "";
-                    }
-                  }}
-                  className="btn"
-                >
-                  Erase
-                </button>
-                <label
-                  htmlFor="my-modal-6"
-                  className="btn"
-                  onClick={() => {
-                    ValidateEmail(settings.email);
-                    if (val === null) return;
-                    if (val === false) {
-                    }
-                    setTimeout(() => {
-                      if (!emailInputRef.current) return;
-                      emailInputRef.current.checked = false;
-                    });
-                  }}
-                >
-                  Submit
+                  <input
+                    required
+                    type="email"
+                    id="emailAddress"
+                    placeholder="  example@email.com"
+                    className={clsx(
+                      " peer input  w-5/6  rounded-lg border border-black  peer-invalid:text-red-600"
+                      // {
+                      //   " border-pink-600": !pRef.current?.hidden,
+                      // }
+                    )}
+                  />
+                  <p
+                    ref={pRef}
+                    className="mt-2 hidden items-start text-sm text-pink-600 peer-invalid:block"
+                  >
+                    Please provide a valid email address.
+                  </p>
                 </label>
-              </div>
+
+                <div className="modal-action">
+                  <input type="reset" className="btn" />
+                  <input type="submit" className="btn" />
+                </div>
+              </form>
             </div>
           </div>
         </div>
