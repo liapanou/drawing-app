@@ -2,7 +2,7 @@ import { useSettings } from "@/providers";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
 import { default as p5Types } from "p5";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 // Will only import `react-p5` on client-side
 const Sketch = dynamic(
@@ -23,29 +23,28 @@ export default function Page() {
   const [p5Instance, setP5Instance] = useState<p5Types>();
   const [erase, setErase] = useState<boolean>(false);
   const [fillBg, setFillBg] = useState<boolean>(false);
-  const [val, setVal] = useState<boolean | null>(null);
+  const [textModal, setTextModal] = useState<boolean>(false);
+  const [emailModal, setEmailModal] = useState<boolean>(false);
   const ref = useRef<p5Types>(null);
   const settings = useSettings();
   const menuRef = useRef<HTMLDivElement>(null);
-  const textInputRef = useRef<HTMLInputElement>(null);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const pRef = useRef<HTMLParagraphElement>(null);
+
   let canvas: p5Types.Element | HTMLCanvasElement;
   let menuWidthRef = useRef(0);
   let width: number;
 
-  useEffect(() => {
-    const menu = menuRef.current;
-    if (menu) {
-      menuWidthRef.current = menu.clientWidth;
-    }
-  }, [menuRef]);
+  // useEffect(() => {
+  //   const menu = menuRef.current;
+  //   if (menu) {
+  //     menuWidthRef.current = menu.clientWidth;
+  //   }
+  // }, [menuRef]);
 
   // auto runs once at start of program
 
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     if (menuRef.current) {
-      width = p5.windowWidth - menuWidthRef.current; // set the width of the canvas to be the windows.width - menu.width
+      width = p5.windowWidth - 300; // set the width of the canvas to be the windows.width - menu.width
       canvas = p5.createCanvas(width, p5.windowHeight).parent(canvasParentRef);
       setP5Instance(p5);
       p5.background("#fff");
@@ -142,20 +141,6 @@ export default function Page() {
     p5Instance?.clear();
   };
 
-  const ValidateEmail = (email: string) => {
-    var validRegex =
-      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    if (email === "") {
-      setVal(null);
-    }
-    if (email.match(validRegex)) {
-      setVal(true);
-    } else {
-      setVal(false);
-    }
-  };
-
-  console.log(emailInputRef.current?.checked);
   return (
     <div className=" grid h-screen w-screen grid-cols-[300px_2fr] bg-white ">
       <div
@@ -238,15 +223,14 @@ export default function Page() {
           <label
             htmlFor="my-modal-5"
             onClick={() => {
-              if (!textInputRef.current) return;
-              textInputRef.current.checked = true;
               settings.setMode(0);
+              setTextModal(true);
               setFillBg(false);
             }}
             className={clsx(
               "btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
               {
-                "bg-yellow-200": settings.tool === 0 && fillBg === false,
+                "bg-yellow-200": textModal,
               }
             )}
           >
@@ -255,42 +239,42 @@ export default function Page() {
 
           {/* Put this part before </body> tag */}
           <input type="checkbox" id="my-modal-5" className="modal-toggle" />
-          <div className="modal">
+          <div className={clsx("modal", { "modal-open": textModal })}>
             <div className="modal-box z-50">
-              <h3 className="mb-4 text-lg font-bold">
-                Write what you like here :
-              </h3>
-              <input
-                ref={textInputRef}
-                checked={textInputRef?.current?.checked}
-                type="text"
-                onChange={(evt) => settings.setText(evt.currentTarget.value)}
-                className=" h-10 w-full rounded-lg border border-black"
-              />
-              <div className="modal-action">
-                <button
-                  onClick={() => {
-                    settings.setText("");
-                    if (textInputRef.current) {
-                      textInputRef.current.value = "";
+              <form
+                onSubmit={(evt) => {
+                  evt.preventDefault(); // stops the rerender of the page which is caused when you submit the form
+                  setTextModal(false);
+                }}
+              >
+                <label className="block">
+                  <label
+                    htmlFor="tetx"
+                    className="mb-4 block text-lg font-bold"
+                  >
+                    Write what you like here :
+                  </label>
+                  <input
+                    type="text"
+                    onChange={(evt) =>
+                      settings.setText(evt.currentTarget.value)
                     }
-                  }}
-                  className="btn"
-                >
-                  Erase
-                </button>
-
-                <label
-                  htmlFor="my-modal-5"
-                  className="btn"
-                  onClick={() => {
-                    if (!textInputRef.current) return;
-                    textInputRef.current.checked = false;
-                  }}
-                >
-                  Submit
+                    className=" h-10 w-full rounded-lg border border-black"
+                  />
                 </label>
-              </div>
+
+                <div className="modal-action">
+                  <input
+                    type="reset"
+                    onClick={() => {
+                      settings.setText("");
+                    }}
+                    className="btn"
+                  />
+
+                  <input type="submit" className="btn" />
+                </div>
+              </form>
             </div>
           </div>
         </div>
@@ -325,14 +309,13 @@ export default function Page() {
           <label
             htmlFor="my-modal-6"
             onClick={() => {
-              if (!emailInputRef.current) return;
-              emailInputRef.current.checked = true;
-              settings.setMode(2);
+              settings.setMode(0);
+              setEmailModal(true);
               setFillBg(false);
             }}
             className={clsx(
               "btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": emailInputRef.current?.checked }
+              { "bg-yellow-200": emailModal }
             )}
           >
             📧
@@ -340,33 +323,28 @@ export default function Page() {
 
           {/* Put this part before </body> tag */}
           <input type="checkbox" id="my-modal-6" className="modal-toggle" />
-          <div className="modal">
+          <div className={clsx("modal", { "modal-open": emailModal })}>
             <div className="modal-box z-50">
-              <form onSubmit={(evt) => {}}>
+              <form
+                onSubmit={(evt) => {
+                  evt.preventDefault(); // stops the rerender of the page which is caused when you submit the form
+                  setEmailModal(false);
+                }}
+              >
                 <label className=" block">
                   <label
-                    htmlFor="emailAddress"
-                    className="mb-4 block text-lg font-bold"
+                    htmlFor="email"
+                    className="mb-2 block text-lg font-bold"
                   >
-                    Write the email which you want to send your drawing :
+                    Email :
                   </label>
 
                   <input
-                    required
                     type="email"
-                    id="emailAddress"
-                    placeholder="  example@email.com"
-                    className={clsx(
-                      " peer input  w-5/6  rounded-lg border border-black  peer-invalid:text-red-600"
-                      // {
-                      //   " border-pink-600": !pRef.current?.hidden,
-                      // }
-                    )}
-                  />
-                  <p
-                    ref={pRef}
-                    className="mt-2 hidden items-start text-sm text-pink-600 peer-invalid:block"
-                  >
+                    className="peer block w-full rounded-md border border-black bg-white px-3 py-2 placeholder-slate-400 shadow-sm   focus:outline-none focus:ring-1 focus:valid:border-green-600 focus:valid:ring-green-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none sm:text-sm"
+                    placeholder="you@example.com"
+                  ></input>
+                  <p className="invisible mt-2 text-sm text-pink-600 peer-invalid:visible">
                     Please provide a valid email address.
                   </p>
                 </label>
@@ -399,8 +377,8 @@ export default function Page() {
           setup={setup}
           draw={draw}
           mousePressed={() => {
-            if (textInputRef?.current?.checked === true) return;
-            textMode();
+            if (textModal) return;
+            if (textModal === false && settings.tool === 0) textMode();
           }}
         />
       </div>
