@@ -2,32 +2,21 @@ import { useSettings } from "@/providers";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
 import { default as p5Types } from "p5";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
-// gets random image from a list
-function getRandomImage() {
-  const arr: string[] = [
-    "/images/northern lights.jpeg",
-    "/images/1456237268.jpg",
-    "/images/greece-meteora.jpeg",
-    "/images/Most-beautiful-places-in-Greece.jpg",
-    "/images/Rhodes.jpg",
-    "/images/Santorini-min.jpg",
-    "/images/screen-shot-2018-07-11-at-5-06-55-pm-1531343396.png",
-    "/images/shutterstock_282952640-1024x683.jpg",
-    "/images/the-best-place-to-focus-in-a-landscape.jpg",
-    "/images/Zakynthos-Navagio-bay-Greek-island.jpg",
-    "/images/greece-in-pictures-beautfiul-places-to-photograph-mykonose-windmill.jpg",
-  ];
-
-  // get random index value
-  const randomIndex = Math.floor(Math.random() * arr.length);
-
-  // get random item
-  const item = arr[randomIndex];
-
-  return item;
-}
+const arr: string[] = [
+  "/images/northern lights.jpeg",
+  "/images/1456237268.jpg",
+  "/images/greece-meteora.jpeg",
+  "/images/Most-beautiful-places-in-Greece.jpg",
+  "/images/Rhodes.jpg",
+  "/images/Santorini-min.jpg",
+  "/images/screen-shot-2018-07-11-at-5-06-55-pm-1531343396.png",
+  "/images/shutterstock_282952640-1024x683.jpg",
+  "/images/the-best-place-to-focus-in-a-landscape.jpg",
+  "/images/Zakynthos-Navagio-bay-Greek-island.jpg",
+  "/images/greece-in-pictures-beautfiul-places-to-photograph-mykonose-windmill.jpg",
+];
 
 // makes a toast when you submit an email
 
@@ -57,13 +46,12 @@ export default function Page() {
   //See annotations in JS for more information
   const [p5Instance, setP5Instance] = useState<p5Types>();
   const [erase, setErase] = useState<boolean>(false);
-  const [fillBg, setFillBg] = useState<boolean>(false);
   const [textModal, setTextModal] = useState<boolean>(false);
+  const [text, setText] = useState<boolean>(false);
   const [emailModal, setEmailModal] = useState<boolean>(false);
-  const ref = useRef<p5Types>(null);
+  const [image, setImage] = useState<string>("/images/northern lights.jpeg");
   const settings = useSettings();
   const menuRef = useRef<HTMLDivElement>(null);
-  const randomImage = useMemo(() => getRandomImage(), []); // change image when the page redenders
   let canvas: p5Types.Element | HTMLCanvasElement;
   let menuWidthRef = useRef(0);
   let width: number;
@@ -75,8 +63,18 @@ export default function Page() {
   //   }
   // }, [menuRef]);
 
-  // auto runs once at start of program
+  // gets random image from a list
+  function getRandomImage() {
+    // get random index value
+    const randomIndex = Math.floor(Math.random() * arr.length);
 
+    // get random item
+    const item = arr[randomIndex];
+
+    setImage(item);
+  }
+
+  // auto runs once at start of program
   const setup = (p5: p5Types, canvasParentRef: Element) => {
     if (menuRef.current) {
       width = p5.windowWidth - 300; // set the width of the canvas to be the windows.width - menu.width
@@ -101,74 +99,16 @@ export default function Page() {
     }
   };
 
-  // start of rules of paint backet
-  const floodFill = (
-    p5: p5Types,
-    x: number,
-    y: number,
-    targetColor: any,
-    fillColor: any
-  ) => {
-    x = p5.mouseX;
-    y = p5.mouseY;
-    console.log("floodFill called with", x, y, targetColor, fillColor);
-    const currentColor = p5.get(x, y);
-    if (!compareColors(currentColor, targetColor)) {
-      return; // stop if the current color is not the target color
-    }
-    p5.set(x, y, fillColor); // fill the current pixel with the fill color
-    floodFill(p5, x + 1, y, targetColor, fillColor); // fill the right neighbor
-    floodFill(p5, x - 1, y, targetColor, fillColor); // fill the left neighbor
-    floodFill(p5, x, y + 1, targetColor, fillColor); // fill the bottom neighbor
-    floodFill(p5, x, y - 1, targetColor, fillColor); // fill the top neighbor
-  };
-
-  const compareColors = (c1: any, c2: any) => {
-    // compare two color values as arrays of [R, G, B, A]
-    let currentColor = c1;
-    let targetColor = c2;
-    if (!p5Instance) {
-      return false;
-    }
-    // compare colors and return result
-    for (let i = 0; i < 4; i++) {
-      if (currentColor[i] !== targetColor[i]) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  const colorBacket = () => {
-    if (p5Instance && fillBg === true && p5Instance.mouseIsPressed === true) {
-      let x = p5Instance.mouseX;
-      let y = p5Instance.mouseY;
-      const targetColor = p5Instance.get(p5Instance.mouseX, p5Instance.mouseY);
-      console.log(targetColor);
-      const fillColor = p5Instance.color(255, 0, 0);
-      console.log(targetColor);
-      floodFill(
-        p5Instance,
-        p5Instance.mouseX,
-        p5Instance.mouseY,
-        targetColor,
-        fillColor
-      );
-    }
-  };
-
-  // end of rules of paint backet
-
   // makes text
   const textMode = () => {
-    let x = p5Instance?.mouseX;
-    let y = p5Instance?.mouseY;
     if (p5Instance && settings.tool === 0) {
+      setText(true);
       let x = p5Instance.mouseX;
       let y = p5Instance.mouseY;
       p5Instance.textSize(32);
-      p5Instance.text(settings.text, x, y);
       p5Instance.fill(settings.selectedColor);
+      p5Instance.text(settings.text, x, y);
+      setText(false);
     }
   };
 
@@ -183,11 +123,11 @@ export default function Page() {
         ref={menuRef}
         className=" flex flex-col border-r border-black bg-zinc-400 py-2 px-2"
       >
-        <h2 className=" mb-4  text-center font-bold">Drawing Tools</h2>
+        <h2 className=" mb-6  text-center font-bold">Drawing Tools</h2>
         <button
           id="clearCanvas"
           type="button"
-          className=" mb-4 rounded-full border border-black p-2 hover:bg-yellow-200"
+          className=" mb-8 rounded-full border border-black p-2 hover:bg-yellow-200"
           onClick={() => clearCanvas()}
         >
           Clear canvas
@@ -203,70 +143,17 @@ export default function Page() {
             data-hover="eraser"
             onClick={() => {
               setErase(true);
-              setFillBg(false);
               settings.setMode(10);
             }}
           >
             🧹
           </button>
-          <button
-            type="button"
-            className={clsx(
-              "hovertext h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": fillBg }
-            )}
-            data-hover="paint backet"
-            onClick={() => {
-              setErase(false);
-              settings.setMode(0);
-              setFillBg(true);
-
-              colorBacket();
-            }}
-          >
-            🪣
-          </button>
-        </div>
-        <div className=" flex items-center justify-center gap-4 xl:mb-4 2xl:mb-8">
-          <button
-            type="button"
-            className={clsx(
-              " hovertext h-fit w-fit rounded-full border border-black p-2  hover:bg-yellow-200",
-              { "bg-yellow-200": settings.tool === 4 }
-            )}
-            data-hover="pencil"
-            onClick={() => {
-              setErase(false);
-              setFillBg(false);
-              settings.setMode(4);
-            }}
-          >
-            ✏️
-          </button>
-          <button
-            type="button"
-            className={clsx(
-              " hovertext h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": settings.tool === 9 }
-            )}
-            data-hover="paint brush"
-            onClick={() => {
-              setErase(false);
-              setFillBg(false);
-              settings.setMode(9);
-            }}
-          >
-            🖌️
-          </button>
-        </div>
-        <div className=" flex items-center justify-center gap-4 xl:mb-4 2xl:mb-8">
           {/* The button to open modal */}
           <label
             htmlFor="my-modal-5"
             onClick={() => {
               settings.setMode(0);
               setTextModal(true);
-              setFillBg(false);
             }}
             className={clsx(
               "hovertext btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
@@ -278,11 +165,16 @@ export default function Page() {
           >
             🇦
           </label>
-
           {/* Put this part before </body> tag */}
-
           <div className={clsx("modal", { "modal-open": textModal })}>
             <div className="modal-box z-50">
+              <label
+                htmlFor="my-modal-5"
+                onClick={() => setTextModal(false)}
+                className="btn-sm btn absolute right-2 top-2 border-none bg-transparent text-black hover:bg-transparent"
+              >
+                ✕
+              </label>
               <form
                 onSubmit={(evt) => {
                   evt.preventDefault(); // stops the rerender of the page which is caused when you submit the form
@@ -302,24 +194,60 @@ export default function Page() {
                       settings.setText(evt.currentTarget.value)
                     }
                     className=" h-10 w-full rounded-lg border border-black"
+                    required
                   />
                 </label>
 
                 <div className="modal-action">
-                  <input
+                  <button
                     type="reset"
                     onClick={() => {
                       settings.setText("");
                     }}
                     className="btn"
-                  />
+                  >
+                    Clear
+                  </button>
 
-                  <input type="submit" className="btn" />
+                  <button type="submit" className="btn">
+                    Ok
+                  </button>
                 </div>
               </form>
             </div>
           </div>
         </div>
+        <div className=" flex items-center justify-center gap-4 xl:mb-4 2xl:mb-8">
+          <button
+            type="button"
+            className={clsx(
+              " hovertext h-fit w-fit rounded-full border border-black p-2  hover:bg-yellow-200",
+              { "bg-yellow-200": settings.tool === 4 }
+            )}
+            data-hover="pencil"
+            onClick={() => {
+              setErase(false);
+              settings.setMode(4);
+            }}
+          >
+            ✏️
+          </button>
+          <button
+            type="button"
+            className={clsx(
+              " hovertext h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
+              { "bg-yellow-200": settings.tool === 9 }
+            )}
+            data-hover="paint brush"
+            onClick={() => {
+              setErase(false);
+              settings.setMode(9);
+            }}
+          >
+            🖌️
+          </button>
+        </div>
+
         <div className="flex flex-col items-center  justify-center gap-3 xl:mb-4 2xl:mb-8">
           <h2 className="mb-2 2xl:mb-4">Select Color :</h2>
           <input
@@ -332,111 +260,128 @@ export default function Page() {
           />
         </div>
         <div className="mb-4 flex  flex-col items-center justify-center 2xl:mb-8">
-          <h2 className="mb-2 2xl:mb-4">Save your drawing :</h2>
-          <button
-            id="saveCanvas"
-            type="button"
-            className={clsx(
-              " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200"
-            )}
-            onClick={() => {
-              p5Instance?.saveCanvas(canvas, "my-drawing", "png"); // saves and downloads the drawing in your device
-            }}
-          >
-            💾
-          </button>
-        </div>
+          <h2 className="mb-2 2xl:mb-8">Save or Share :</h2>
+          <div className="flex gap-2">
+            <button
+              id="saveCanvas"
+              type="button"
+              className={clsx(
+                " h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200"
+              )}
+              onClick={() => {
+                p5Instance?.saveCanvas(canvas, "my-drawing", "png"); // saves and downloads the drawing in your device
+              }}
+            >
+              💾
+            </button>
 
-        <div className=" flex flex-col items-center justify-center">
-          <h2 className="mb-2 2xl:mb-4">Share your drawing :</h2>
-          {/* The button to open modal */}
-          <label
-            htmlFor="my-modal-6"
-            onClick={() => {
-              settings.setMode(0);
-              setEmailModal(true);
-              setFillBg(false);
-            }}
-            className={clsx(
-              " hovertext btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
-              { "bg-yellow-200": emailModal }
-            )}
-            data-hover="email"
-          >
-            📧
-          </label>
-          {/* <Toaster /> */}
-
-          {/* Put this part before </body> tag */}
-
-          <div className={clsx("modal", { "modal-open": emailModal })}>
-            <div className="modal-box z-50">
-              <form
-                onSubmit={(evt) => {
-                  evt.preventDefault(); // stops the rerender of the page which is caused when you submit the form
-                  setEmailModal(false);
-                }}
-              >
-                <label className=" block">
-                  <label
-                    htmlFor="email"
-                    className="mb-2 block text-lg font-bold"
-                  >
-                    Email :
-                  </label>
-
-                  <input
-                    type="email"
-                    className="peer block w-full rounded-md border border-black bg-white px-3 py-2 placeholder-slate-400 shadow-sm   focus:outline-none focus:ring-1 focus:valid:border-green-600 focus:valid:ring-green-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none sm:text-sm"
-                    placeholder="you@example.com"
-                  ></input>
-                  <p className="invisible mt-2 text-sm text-pink-600 peer-invalid:visible">
-                    Please provide a valid email address.
-                  </p>
-                </label>
-
-                <div className="modal-action">
-                  <input type="reset" className="btn" />
-                  <input type="submit" className="btn" />
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-auto flex flex-col items-center justify-center gap-4 xl:mb-36 2xl:mb-8">
-          <h2 className="font-bold ">Drawing Goal</h2>
-          <div className="blinking-border">
             {/* The button to open modal */}
-            <label htmlFor="my-modal-3">
-              <picture>
-                <img
-                  src={randomImage}
-                  alt="Drawing Goal"
-                  width={500}
-                  height={500}
-                />
-              </picture>
+            <label
+              htmlFor="my-modal-6"
+              onClick={() => {
+                settings.setMode(0);
+                setEmailModal(true);
+              }}
+              className={clsx(
+                " hovertext btn1 mb-4 h-fit   w-fit border border-black bg-transparent p-2 hover:bg-yellow-200",
+                { "bg-yellow-200": emailModal }
+              )}
+              data-hover="email"
+            >
+              📧
             </label>
+
             {/* Put this part before </body> tag */}
-            <input type="checkbox" id="my-modal-3" className="modal-toggle" />
-            <div className="modal">
-              <div className="modal-box relative h-fit w-fit ">
+            <div className={clsx("modal", { "modal-open": emailModal })}>
+              <div className="modal-box z-50">
                 <label
-                  htmlFor="my-modal-3"
+                  htmlFor="my-modal-6"
+                  onClick={() => setEmailModal(false)}
                   className="btn-sm btn absolute right-2 top-2 border-none bg-transparent text-black hover:bg-transparent"
                 >
                   ✕
                 </label>
-                <br />
+                <form
+                  onSubmit={(evt) => {
+                    evt.preventDefault(); // stops the rerender of the page which is caused when you submit the form
+                    setEmailModal(false);
+                  }}
+                >
+                  <label className=" block">
+                    <label
+                      htmlFor="email"
+                      className="mb-2 block text-lg font-bold"
+                    >
+                      Email :
+                    </label>
+
+                    <input
+                      type="email"
+                      className="peer block w-full rounded-md border border-black bg-white px-3 py-2 placeholder-slate-400 shadow-sm   focus:outline-none focus:ring-1 focus:valid:border-green-600 focus:valid:ring-green-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none sm:text-sm"
+                      placeholder="you@example.com"
+                      required
+                    />
+                    <p className="invisible mt-2 text-sm text-pink-600 peer-invalid:visible">
+                      Please provide a valid email address.
+                    </p>
+                  </label>
+
+                  <div className="modal-action">
+                    <button type="reset" className="btn">
+                      Clear
+                    </button>
+                    <button type="submit" className="btn">
+                      Ok
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className=" flex flex-col items-center justify-center gap-4 ">
+          <h2 className="font-bold ">Drawing Goal</h2>
+          <div className="flex flex-col">
+            <div className="blinking-border mb-2 h-fit w-fit ">
+              {/* The button to open modal */}
+              <label htmlFor="my-modal-3" className="hover:cursor-pointer">
                 <picture>
                   <img
-                    className="h-max w-max "
-                    src={randomImage}
+                    src={image}
                     alt="Drawing Goal"
+                    width={400}
+                    height={400}
                   />
                 </picture>
-              </div>
+              </label>
+            </div>
+
+            <button
+              className=" ml-auto flex  h-fit w-fit items-center justify-center  rounded-md border border-black p-2 font-bold text-black hover:bg-yellow-200"
+              type="button"
+              onClick={() => getRandomImage()}
+            >
+              <span className="text-lg ">Next</span>
+              <span className="mb-1 text-center text-2xl">→</span>
+            </button>
+          </div>
+
+          {/* Put this part before </body> tag */}
+          <input type="checkbox" id="my-modal-3" className="modal-toggle" />
+          <div className="modal">
+            <div className="modal-box relative h-fit w-fit ">
+              <label
+                htmlFor="my-modal-3"
+                className="btn-sm btn absolute right-2 top-2 border-none bg-transparent text-black hover:bg-transparent"
+                onClick={() => settings.setMode(0)}
+              >
+                ✕
+              </label>
+              <br />
+              <picture>
+                <img className="h-max w-max " src={image} alt="Drawing Goal" />
+              </picture>
             </div>
           </div>
         </div>
@@ -447,7 +392,11 @@ export default function Page() {
           draw={draw}
           mousePressed={() => {
             if (textModal) return;
-            if (textModal === false && settings.tool === 0) textMode();
+            if (textModal === false && settings.tool === 0)
+              setTimeout(() => {
+                textMode();
+                if (text === false) settings.setMode(4);
+              }, 0);
           }}
         />
       </div>
