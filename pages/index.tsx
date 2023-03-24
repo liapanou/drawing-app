@@ -89,11 +89,12 @@ export default function Page() {
   // auto loops continuously
   // the specific draw rules say that you can draw lines when the mouse is pressed
   const draw = (p5: p5Types) => {
+    if (textModal || emailModal) return;
+
     let px = p5.pmouseX;
     let py = p5.pmouseY;
     let x = p5.mouseX;
     let y = p5.mouseY;
-    if (settings.text) return;
 
     if (p5.mouseIsPressed === true) {
       p5.stroke(erase ? "#fff" : settings.selectedColor); // set the correct color depending on the state of erase
@@ -104,12 +105,15 @@ export default function Page() {
 
   // makes text
   const textMode = () => {
+    if (!settings.text) return;
     if (!p5Instance) return;
     let x = p5Instance.mouseX;
     let y = p5Instance.mouseY;
     p5Instance.textSize(32);
     p5Instance.fill(settings.selectedColor);
     p5Instance.text(settings.text, x, y);
+
+    settings.setText("");
   };
 
   // clears the canvas
@@ -151,14 +155,15 @@ export default function Page() {
           {/* The button to open modal */}
           <label
             htmlFor="my-modal-5"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               settings.setMode(0);
               setTextModal(true);
             }}
             className={clsx(
               "hovertext btn1 h-fit w-fit   border border-black bg-transparent p-2 hover:bg-yellow-200",
               {
-                "bg-yellow-200": textModal,
+                "bg-yellow-200": settings.text,
               }
             )}
             data-hover={t("text")}
@@ -177,6 +182,7 @@ export default function Page() {
               </label>
               <form
                 onSubmit={(evt) => {
+                  evt.stopPropagation();
                   evt.preventDefault(); // stops the rerender of the page which is caused when you submit the form
                   setTextModal(false);
                 }}
@@ -193,7 +199,8 @@ export default function Page() {
                     onChange={(evt) =>
                       settings.setText(evt.currentTarget.value)
                     }
-                    className=" h-10 w-full rounded-lg border border-black"
+                    value={settings?.text ?? ""}
+                    className=" input h-10 w-full rounded-lg border border-black"
                     required
                   />
                 </label>
@@ -211,7 +218,7 @@ export default function Page() {
 
                   <button
                     onClick={(e) => {
-                      // e.stopPropagation();
+                      e.stopPropagation();
                     }}
                     type="submit"
                     className="btn"
@@ -348,30 +355,27 @@ export default function Page() {
 
         <div className=" flex flex-col items-center justify-center gap-4 ">
           <h2 className="font-bold ">{t("drawingGoal")}</h2>
-          <div className="flex flex-col">
-            <div className="blinking-border mb-2 h-fit w-fit ">
-              {/* The button to open modal */}
-              <label htmlFor="my-modal-3" className="hover:cursor-zoom-in">
-                <picture>
-                  <img
-                    src={image}
-                    alt="Drawing Goal"
-                    width={400}
-                    height={400}
-                  />
-                </picture>
-              </label>
-            </div>
-
-            <button
-              className=" ml-auto flex  h-fit w-fit items-center justify-center  rounded-md border border-black p-2 font-bold text-black hover:bg-yellow-200"
-              type="button"
-              onClick={() => getRandomImage()}
-            >
-              <span className="text-lg ">{t("next")}</span>
-              <span className="mb-1 text-center text-2xl">→</span>
-            </button>
+          <div className="blinking-border mb-2 h-40 w-full  bg-black ">
+            {/* The button to open modal */}
+            <label htmlFor="my-modal-3" className="hover:cursor-zoom-in">
+              <picture>
+                <img
+                  src={image}
+                  alt="Drawing Goal"
+                  className="h-full w-full object-contain"
+                />
+              </picture>
+            </label>
           </div>
+
+          <button
+            className=" flex h-fit  w-full items-center justify-center rounded-full  border border-black p-2 font-bold text-black hover:bg-yellow-200"
+            type="button"
+            onClick={() => getRandomImage()}
+          >
+            <span className="text-lg ">{t("next")}</span>
+            <span className="mb-1 text-center text-2xl">→</span>
+          </button>
 
           {/* Put this part before </body> tag */}
           <input type="checkbox" id="my-modal-3" className="modal-toggle" />
@@ -394,16 +398,11 @@ export default function Page() {
       </div>
       <div>
         <Sketch
+          mouseClicked={() => {
+            textMode();
+          }}
           setup={setup}
           draw={draw}
-          mousePressed={() => {
-            if (textModal || emailModal) return;
-            setTimeout(() => {
-              textMode();
-              settings.setMode(4);
-              settings.setText("");
-            });
-          }}
         />
       </div>
     </div>

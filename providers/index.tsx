@@ -3,22 +3,22 @@ import { createContext, ReactNode, useContext, useState } from "react";
 type ContextType = {
   tool: number;
   selectedColor: string;
-  text: string;
+  text?: string;
   email: string;
   setMode: (n: number) => void;
   setSelectedColor: (c: string) => void;
-  setText: (t: string) => void;
+  setText: (t?: string) => void;
   setEmail: (e: string) => void;
 };
 
 const defaultValue: ContextType = {
   tool: 4,
   selectedColor: "#000000",
-  text: "",
+  text: undefined,
   email: "",
   setMode: (n: number) => {},
   setSelectedColor: (c: string) => {},
-  setText: (t: string) => {},
+  setText: (t?: string) => {},
   setEmail: (e: string) => {},
 };
 
@@ -42,13 +42,14 @@ export function SettingsProvider(props: { children: ReactNode }) {
     });
   }
 
-  function setText(t: string) {
-    setState({ ...state, text: t });
+  function setText(text?: string) {
+    setState({ ...state, text, tool: text ? 0 : 4 });
   }
 
   function setEmail(e: string) {
     setState({ ...state, email: e });
   }
+
   return (
     <Context.Provider
       value={{
