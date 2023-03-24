@@ -330,7 +330,7 @@ export default function Page() {
 
                     <input
                       type="email"
-                      className="peer block w-full rounded-md border border-black bg-white px-3 py-2 placeholder-slate-400 shadow-sm   focus:outline-none focus:ring-1 focus:valid:border-green-600 focus:valid:ring-green-600 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none sm:text-sm"
+                      className="peer block w-full rounded-md border border-black bg-white px-3 py-2 placeholder-slate-400 shadow-sm   focus:outline-none focus:ring-1 focus:invalid:border-pink-500 focus:invalid:ring-pink-500 disabled:border-slate-200 disabled:bg-slate-50 disabled:text-slate-500 disabled:shadow-none sm:text-sm"
                       placeholder="you@example.com"
                       required
                     />
@@ -355,7 +355,7 @@ export default function Page() {
 
         <div className=" flex flex-col items-center justify-center gap-4 ">
           <h2 className="font-bold ">{t("drawingGoal")}</h2>
-          <div className="blinking-border mb-2 h-40 w-full  bg-black ">
+          <div className="blinking-border mb-2 h-40 w-fit   ">
             {/* The button to open modal */}
             <label htmlFor="my-modal-3" className="hover:cursor-zoom-in">
               <picture>

@@ -52,7 +52,7 @@ const translations: Record<Locale, Record<Key, string>> = {
     drawingGoal: "Σχεδιαστικός Στόχος",
     next: "Επόμενο",
     labelOfTextModal: "Γράψτε ότι θέλετε εδώ :",
-    clear: "Καθαρισμός",
+    clear: "Καθαρισμoς",
     labelOfEmailModal: "Ηλ. Διεύθυνση",
     falseEmailAddress: "Παρακαλώ γράψτε μια έγκυρη ηλ. διεύθυνση.",
   },
