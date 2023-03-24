@@ -1,3 +1,4 @@
+import { useT } from "@/Hook/useT";
 import { useSettings } from "@/providers";
 import clsx from "clsx";
 import dynamic from "next/dynamic";
@@ -47,7 +48,7 @@ export default function Page() {
   const [p5Instance, setP5Instance] = useState<p5Types>();
   const [erase, setErase] = useState<boolean>(false);
   const [textModal, setTextModal] = useState<boolean>(false);
-  const [text, setText] = useState<boolean>(false);
+
   const [emailModal, setEmailModal] = useState<boolean>(false);
   const [image, setImage] = useState<string>("/images/northern lights.jpeg");
   const settings = useSettings();
@@ -55,6 +56,7 @@ export default function Page() {
   let canvas: p5Types.Element | HTMLCanvasElement;
   let menuWidthRef = useRef(0);
   let width: number;
+  const t = useT(); // passes to the component the translation function
 
   // useEffect(() => {
   //   const menu = menuRef.current;
@@ -91,6 +93,7 @@ export default function Page() {
     let py = p5.pmouseY;
     let x = p5.mouseX;
     let y = p5.mouseY;
+    if (settings.text) return;
 
     if (p5.mouseIsPressed === true) {
       p5.stroke(erase ? "#fff" : settings.selectedColor); // set the correct color depending on the state of erase
@@ -101,15 +104,12 @@ export default function Page() {
 
   // makes text
   const textMode = () => {
-    if (p5Instance && settings.tool === 0) {
-      setText(true);
-      let x = p5Instance.mouseX;
-      let y = p5Instance.mouseY;
-      p5Instance.textSize(32);
-      p5Instance.fill(settings.selectedColor);
-      p5Instance.text(settings.text, x, y);
-      setText(false);
-    }
+    if (!p5Instance) return;
+    let x = p5Instance.mouseX;
+    let y = p5Instance.mouseY;
+    p5Instance.textSize(32);
+    p5Instance.fill(settings.selectedColor);
+    p5Instance.text(settings.text, x, y);
   };
 
   // clears the canvas
@@ -123,14 +123,14 @@ export default function Page() {
         ref={menuRef}
         className=" flex flex-col border-r border-black bg-zinc-400 py-2 px-2"
       >
-        <h2 className=" mb-6  text-center font-bold">Drawing Tools</h2>
+        <h2 className=" mb-6  text-center font-bold">{t("drawingTools")}</h2>
         <button
           id="clearCanvas"
           type="button"
           className=" mb-8 rounded-full border border-black p-2 hover:bg-yellow-200"
           onClick={() => clearCanvas()}
         >
-          Clear canvas
+          {t("clearCanvas")}
         </button>
 
         <div className="flex items-center justify-center gap-4 xl:mb-4 2xl:mb-8">
@@ -140,7 +140,7 @@ export default function Page() {
               "hovertext h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
               { "bg-yellow-200": settings.tool === 10 }
             )}
-            data-hover="eraser"
+            data-hover={t("eraser")}
             onClick={() => {
               setErase(true);
               settings.setMode(10);
@@ -161,7 +161,7 @@ export default function Page() {
                 "bg-yellow-200": textModal,
               }
             )}
-            data-hover="text"
+            data-hover={t("text")}
           >
             🇦
           </label>
@@ -186,7 +186,7 @@ export default function Page() {
                     htmlFor="tetx"
                     className="mb-4 block text-lg font-bold"
                   >
-                    Write what you like here :
+                    {t("labelOfTextModal")}
                   </label>
                   <input
                     type="text"
@@ -206,10 +206,16 @@ export default function Page() {
                     }}
                     className="btn"
                   >
-                    Clear
+                    {t("clear")}
                   </button>
 
-                  <button type="submit" className="btn">
+                  <button
+                    onClick={(e) => {
+                      // e.stopPropagation();
+                    }}
+                    type="submit"
+                    className="btn"
+                  >
                     Ok
                   </button>
                 </div>
@@ -224,7 +230,7 @@ export default function Page() {
               " hovertext h-fit w-fit rounded-full border border-black p-2  hover:bg-yellow-200",
               { "bg-yellow-200": settings.tool === 4 }
             )}
-            data-hover="pencil"
+            data-hover={t("pencil")}
             onClick={() => {
               setErase(false);
               settings.setMode(4);
@@ -238,7 +244,7 @@ export default function Page() {
               " hovertext h-fit w-fit rounded-full border border-black p-2 hover:bg-yellow-200",
               { "bg-yellow-200": settings.tool === 9 }
             )}
-            data-hover="paint brush"
+            data-hover={t("paintBrush")}
             onClick={() => {
               setErase(false);
               settings.setMode(9);
@@ -249,18 +255,18 @@ export default function Page() {
         </div>
 
         <div className="flex flex-col items-center  justify-center gap-3 xl:mb-4 2xl:mb-8">
-          <h2 className="mb-2 2xl:mb-4">Select Color :</h2>
+          <h2 className="mb-2 2xl:mb-4">{t("selectColor")}</h2>
           <input
             type="color"
             className="hovertext"
-            data-hover="color palette"
+            data-hover={t("colorPallete")}
             onChange={(evt) =>
               settings.setSelectedColor(evt.currentTarget.value)
             }
           />
         </div>
         <div className="mb-4 flex  flex-col items-center justify-center 2xl:mb-8">
-          <h2 className="mb-2 2xl:mb-8">Save or Share :</h2>
+          <h2 className="mb-2 2xl:mb-8">{t("saveOrShare")}</h2>
           <div className="flex gap-2">
             <button
               id="saveCanvas"
@@ -286,7 +292,7 @@ export default function Page() {
                 " hovertext btn1 mb-4 h-fit   w-fit border border-black bg-transparent p-2 hover:bg-yellow-200",
                 { "bg-yellow-200": emailModal }
               )}
-              data-hover="email"
+              data-hover={t("email")}
             >
               📧
             </label>
@@ -307,12 +313,12 @@ export default function Page() {
                     setEmailModal(false);
                   }}
                 >
-                  <label className=" block">
+                  <label className="block">
                     <label
                       htmlFor="email"
                       className="mb-2 block text-lg font-bold"
                     >
-                      Email :
+                      {t("labelOfEmailModal")}
                     </label>
 
                     <input
@@ -322,13 +328,13 @@ export default function Page() {
                       required
                     />
                     <p className="invisible mt-2 text-sm text-pink-600 peer-invalid:visible">
-                      Please provide a valid email address.
+                      {t("falseEmailAddress")}
                     </p>
                   </label>
 
                   <div className="modal-action">
                     <button type="reset" className="btn">
-                      Clear
+                      {t("clear")}
                     </button>
                     <button type="submit" className="btn">
                       Ok
@@ -341,11 +347,11 @@ export default function Page() {
         </div>
 
         <div className=" flex flex-col items-center justify-center gap-4 ">
-          <h2 className="font-bold ">Drawing Goal</h2>
+          <h2 className="font-bold ">{t("drawingGoal")}</h2>
           <div className="flex flex-col">
             <div className="blinking-border mb-2 h-fit w-fit ">
               {/* The button to open modal */}
-              <label htmlFor="my-modal-3" className="hover:cursor-pointer">
+              <label htmlFor="my-modal-3" className="hover:cursor-zoom-in">
                 <picture>
                   <img
                     src={image}
@@ -362,7 +368,7 @@ export default function Page() {
               type="button"
               onClick={() => getRandomImage()}
             >
-              <span className="text-lg ">Next</span>
+              <span className="text-lg ">{t("next")}</span>
               <span className="mb-1 text-center text-2xl">→</span>
             </button>
           </div>
@@ -391,12 +397,12 @@ export default function Page() {
           setup={setup}
           draw={draw}
           mousePressed={() => {
-            if (textModal) return;
-            if (textModal === false && settings.tool === 0)
-              setTimeout(() => {
-                textMode();
-                if (text === false) settings.setMode(4);
-              }, 0);
+            if (textModal || emailModal) return;
+            setTimeout(() => {
+              textMode();
+              settings.setMode(4);
+              settings.setText("");
+            });
           }}
         />
       </div>
