@@ -51,6 +51,7 @@ export default function Page() {
 
   const [emailModal, setEmailModal] = useState<boolean>(false);
   const [image, setImage] = useState<string>("/images/northern lights.jpeg");
+  const [onBg, setOnBg] = useState<boolean>(false);
   const settings = useSettings();
   const menuRef = useRef<HTMLDivElement>(null);
   let canvas: p5Types.Element | HTMLCanvasElement;
@@ -396,7 +397,23 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div>
+      <div className="relative">
+        <button
+          className="absolute z-50 h-fit w-fit border border-black bg-zinc-400 px-4"
+          onClick={() => setOnBg(!onBg)}
+        >
+          {onBg ? "On" : "Off"}
+        </button>
+        <picture>
+          <img
+            className={clsx("absolute h-full w-full opacity-40 ", {
+              hidden: !onBg,
+            })}
+            draggable={false}
+            src={image}
+            alt="Drawing Goal"
+          />
+        </picture>
         <Sketch
           mouseClicked={() => {
             textMode();
