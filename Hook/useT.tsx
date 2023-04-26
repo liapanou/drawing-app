@@ -17,7 +17,8 @@ type Key =
   | "labelOfTextModal"
   | "clear"
   | "labelOfEmailModal"
-  | "falseEmailAddress";
+  | "falseEmailAddress"
+  | "backgroundImage";
 
 const translations: Record<Locale, Record<Key, string>> = {
   en: {
@@ -37,6 +38,7 @@ const translations: Record<Locale, Record<Key, string>> = {
     clear: "Clear",
     labelOfEmailModal: "Email",
     falseEmailAddress: "Please provide a valid email address.",
+    backgroundImage: "Image as background",
   },
   el: {
     drawingTools: "Εργαλεία Σχεδίασης",
@@ -55,6 +57,7 @@ const translations: Record<Locale, Record<Key, string>> = {
     clear: "Καθαρισμoς",
     labelOfEmailModal: "Ηλ. Διεύθυνση",
     falseEmailAddress: "Παρακαλώ γράψτε μια έγκυρη ηλ. διεύθυνση.",
+    backgroundImage: "Εικόνα σε φόντο",
   },
 };
 

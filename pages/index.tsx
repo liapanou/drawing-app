@@ -354,7 +354,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className=" flex flex-col items-center justify-center gap-4 ">
+        <div className=" mb-8 flex flex-col items-center justify-center gap-4 ">
           <h2 className="font-bold ">{t("drawingGoal")}</h2>
           <div className="blinking-border mb-2 h-40 w-fit   ">
             {/* The button to open modal */}
@@ -396,14 +396,17 @@ export default function Page() {
             </div>
           </div>
         </div>
+        <div className="flex items-center justify-center gap-4 ">
+          <h2>{t("backgroundImage")}</h2>
+          <button
+            className=" z-50 h-fit w-fit rounded-full border border-black bg-zinc-400 p-2 px-4 font-bold"
+            onClick={() => setOnBg(!onBg)}
+          >
+            {onBg ? "On" : "Off"}
+          </button>
+        </div>
       </div>
       <div className="relative">
-        <button
-          className="absolute z-50 h-fit w-fit border border-black bg-zinc-400 px-4"
-          onClick={() => setOnBg(!onBg)}
-        >
-          {onBg ? "On" : "Off"}
-        </button>
         <picture>
           <img
             className={clsx("absolute h-full w-full opacity-40 ", {
