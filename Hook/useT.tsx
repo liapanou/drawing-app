@@ -34,7 +34,8 @@ const translations: Record<Locale, Record<Key, string>> = {
     email: "email",
     drawingGoal: "Drawing Goal",
     next: "Next",
-    labelOfTextModal: "Write what you like here :",
+    labelOfTextModal:
+      "Type the text here, press OK and then click where you want it to appear",
     clear: "Clear",
     labelOfEmailModal: "Email",
     falseEmailAddress: "Please provide a valid email address.",
@@ -53,7 +54,8 @@ const translations: Record<Locale, Record<Key, string>> = {
     email: "ηλ. ταχυδρομείο",
     drawingGoal: "Σχεδιαστικός Στόχος",
     next: "Επόμενο",
-    labelOfTextModal: "Γράψτε ότι θέλετε εδώ :",
+    labelOfTextModal:
+      "Γράψτε εδώ το κείμενο, πατήστε ΟΚ και μετά κάνετε κλικ στο σημείο που θέλετε να εμφανιστεί",
     clear: "Καθαρισμoς",
     labelOfEmailModal: "Ηλ. Διεύθυνση",
     falseEmailAddress: "Παρακαλώ γράψτε μια έγκυρη ηλ. διεύθυνση.",

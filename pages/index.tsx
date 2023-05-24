@@ -191,17 +191,16 @@ export default function Page() {
                 <label className="block">
                   <label
                     htmlFor="tetx"
-                    className="mb-4 block text-lg font-bold"
+                    className="mb-6 mt-4 block break-words text-lg font-bold"
                   >
                     {t("labelOfTextModal")}
                   </label>
-                  <input
-                    type="text"
+                  <textarea
                     onChange={(evt) =>
                       settings.setText(evt.currentTarget.value)
                     }
                     value={settings?.text ?? ""}
-                    className=" input h-10 w-full rounded-lg border border-black"
+                    className="textarea-bordered textarea h-fit w-full"
                     required
                   />
                 </label>
