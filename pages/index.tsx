@@ -399,7 +399,7 @@ export default function Page() {
         <div className="flex items-center justify-center gap-4 ">
           <h2>{t("backgroundImage")}</h2>
           <button
-            className=" z-50 h-fit w-fit rounded-full border border-black bg-zinc-400 p-2 px-4 font-bold"
+            className=" z-50 h-fit w-fit rounded-full border border-black bg-zinc-400 p-2 px-4 font-bold hover:bg-yellow-200"
             onClick={() => setOnBg(!onBg)}
           >
             {onBg ? "On" : "Off"}
